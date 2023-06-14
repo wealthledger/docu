@@ -37,7 +37,7 @@ erDiagram
     Contract }|--|| Contract : AccountId
     Contract }|--|| Contract : UnderlyingContractId
     Contract {
-        int Id PK
+        uuid Id PK
         string Name "Name of the contract - instrument or account designation"
         string Description "Description of the contract"
         enum Type "Type of the contract - cash account, security etc."
@@ -46,15 +46,15 @@ erDiagram
         decimal(null) HasFactor "Indication of additional factor for valuation"
         decimal(null) Factor "Additional factor that needs to be applied for valuation"
         date(null) ExpiryDate "Date when the contract expires"
-        int(null) AccountId FK "Parent account relation of the contract"
-        int(null) UnderlyingContractId FK "Underlying contract of an instrument if applicable"
+        uuid(null) AccountId FK "Parent account relation of the contract"
+        uuid(null) UnderlyingContractId FK "Underlying contract of an instrument if applicable"
         enum(null) Custodian "Custodian that holds/issued contract/account"
     }
     Identifier {
-        int Id PK
+        uuid Id PK
         enum Type "Type of the identifier"
         string Val "Id/Value of the identifier"
-        int ContractId "Contract which the identifier identifies"
+        uuid ContractId "Contract which the identifier identifies"
     }
 ```
 
@@ -74,13 +74,13 @@ erDiagram
     Transaction }|--o| Account : AccountId
     Transaction }|--o| Instrument : TriggeringInstrumentId
     Transaction {
-        int Id PK
+        uuid Id PK
         enum Type "Transaction type"
         enum Status "Status of the transaction"
         bool IsReversal "Cancellation/reversal indicator"
         date TransactionDate "Date of the transaction - i.e. trade date"
-        int AccountId "The account where the transaction occurred in, can be the customer"
-        int(null) TriggeringContractId "The contract - account or instrument - that caused the transaction"
+        uuid AccountId "The account where the transaction occurred in, can be the customer"
+        uuid(null) TriggeringContractId "The contract - account or instrument - that caused the transaction"
         string(null) ExtRef "The banks identification of the transaction"
         string(null) ExtLinkRef "The banks reference to a linked transaction"
         string(null) Description "Description of the transaction - usually as delivered by the bank"
@@ -88,13 +88,13 @@ erDiagram
     Entry }|--|| Account : AccountId
     Entry }|--|| Instrument : InstrumentId
     Entry {
-        int Id PK
-        int TransactionId FK "Transaction where the movement ocuurred in"
+        uuid Id PK
+        uuid TransactionId FK "Transaction where the movement ocuurred in"
         enum Type "Entry type"
         date EntryDate "Date when the movement was is booked - typically the bookdate by the bank"
         date(null) ValueDate "Value date for cash movements, relevant for interest"
-        int AccountId FK "Account in which the movement occurred"
-        int InstrumentId FK "Instrument subject to the movemnt"
+        uuid AccountId FK "Account in which the movement occurred"
+        uuid InstrumentId FK "Instrument subject to the movemnt"
         decimal Units "Amount of units that changed"
         decimal(null) Price "Market or indication price of the instrument at the time of movement"
         enum(null) PriceType "Price type, i.e. PerUnit or Percent"
@@ -105,6 +105,24 @@ erDiagram
         string(null) CostFxPair "Source and target currencies of the Cost FX concatenated"
         int(null) MessageId "Message from the entry originated"
         int(null) MessageIndex "Index in the message from where the movement originated"
+    }
+    Account {
+        uuid Id PK
+        uuid(null) AccountId FK "Parent Account if applicable"
+        enum Type "Account type - cash account, safekeeping account etc"
+        string Name
+        string Currency
+        string Nr "Account Nr"
+        string IBAN "IBAN of the account"
+    }
+    Instrument {
+        uuid Id PK
+        enum Type "Instrument type - security, forward contract, money market contract etc."
+        string Name
+        string Currency
+        string ISIN "IBAN of the account"
+        decimal(null) Size "Contract size of the financial instrument"
+        date(null) ExpiryDate "Expiry Date of the financial instrument"
     }
 ```
 
@@ -120,11 +138,11 @@ erDiagram
     Balance }|--|| Account : AccountId
     Balance }|--|| Instrument : InstrumentId
     Balance {
-        int Id PK
+        uuid Id PK
         enum Status "Status of the balance"
         date BalanceDate "Date of the balance"
-        int AccountId FK "Account of the balance"
-        int InstrumentId FK "Instrument to the balance"
+        uuid AccountId FK "Account of the balance"
+        uuid InstrumentId FK "Instrument to the balance"
         decimal Units "Amount of units of the balance"
         decimal(null) Price "Market or indication price of the balance"
         string(null) PriceCurrency "Currency of the price"
@@ -138,7 +156,7 @@ erDiagram
         decimal(null) CostFX "Cost FX that was applied, should be to reference currency of portfolio"
         string(null) CostFXCurrencyPair "Source and target currencies of the Cost FX concatenated"
         enum(null) Source "Source, typically custodian, of the balance"
-        int(null) MessageId "Message from the balance originated"
+        uuid(null) MessageId "Message from the balance originated"
         int(null) MessageIndex "Index in the message from where the balance originated"
     }
 ```
